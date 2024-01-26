@@ -1,4 +1,4 @@
-# SynthReason v0.71 *ULTRA*
+# SynthReason v0.8 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -63,7 +63,7 @@ for question in questions:
         text_graph.create_from_text(filtered_text)
         generated_text = text_graph.generate_text(user_words[0])
         for i in range(recursion):
-            filtered_text = ' '.join(text_graph.preprocess_text(generated_text, user_words))
+            filtered_text = ' '.join(text_graph.preprocess_text(generated_text, questions))
             text_graph.create_from_text(filtered_text)
             generated_text = text_graph.generate_text(user_words[0])
         if generated_text:

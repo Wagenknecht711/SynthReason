@@ -1,4 +1,4 @@
-# SynthReason v0.71 *ULTRA*
+# SynthReason v0.8 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -50,7 +50,7 @@ with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
 filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
 random.shuffle(questions)
-while True:
+while(True):
     random.shuffle(files)
     for file in files:
         with open(file, encoding="UTF-8") as f:
@@ -63,7 +63,7 @@ while True:
         text_graph.create_from_text(filtered_text)
         generated_text = text_graph.generate_text(user_words[0])
         for i in range(recursion):
-            filtered_text = ' '.join(text_graph.preprocess_text(generated_text, user_words))
+            filtered_text = ' '.join(text_graph.preprocess_text(generated_text, questions))
             text_graph.create_from_text(filtered_text)
             generated_text = text_graph.generate_text(user_words[0])
         if generated_text:
