@@ -1,15 +1,12 @@
-# SynthReason v0.91 *ULTRA*
+# SynthReason v0.93 *ULTRA*
 # Copyright 2024 George Wagenknecht
-import re
 import random
 from collections import defaultdict
 import json
-import os
 size = 250
 class TextGraph:
     def __init__(self):
         self.graph = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-    
     def generate_text(self, start_word):
         if start_word not in self.graph:
             return "Start word not found."
@@ -33,17 +30,13 @@ class TextGraph:
             current_word = next_word
             text_length += 1
         return ' '.join(generated_text)
-    def preprocess_text(self, text, user_words):
-        sentences = re.split(r'(?<=[.!?])\s+', text.lower())
-        user_words_set = set(user_words)
-        return [word for sentence in sentences for word in sentence.split() if user_words_set.intersection(sentence.split())]
     def load_graph(self, filename):
         with open(filename, 'r') as f:
             regular_dict = json.load(f)
         self.graph = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         for u, v_dict in regular_dict.items():
             for v, w_dict in v_dict.items():
-                for w, weight in reversed(w_dict.items()):
+                for w, weight in w_dict.items():
                     self.graph[u][v][w] = weight
 text_graph = TextGraph()
 with open("FileList.conf", encoding="ISO-8859-1") as f:
