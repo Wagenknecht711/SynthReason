@@ -13,7 +13,7 @@ class TextGraph:
         weight = 1
         for question in questions:
             if u in question.split() or v in question.split() or w in question.split():
-                weight += 1 
+                weight += 1
         self.graph[u][v][w] += weight
     def generate_text(self, start_word):
         if start_word not in self.graph:
@@ -47,7 +47,6 @@ class TextGraph:
         for i in range(len(words) - n + 1):
             ngram = tuple(words[i:i + n])
             self.add_edge(*ngram, questions)
-        print("*")
     def save_graph(self, filename):
         current_graph_dict = {u: {v: dict(w_dict) for v, w_dict in v_dict.items()} for u, v_dict in self.graph.items()}
         if os.path.exists(filename) and os.path.getsize(filename) > 0:
@@ -77,11 +76,18 @@ with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
 filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
 random.shuffle(questions)
-while(True):
+i = 1
+for file in files:
+    with open(file, encoding="UTF-8") as f:
+        text = f.read()
+    text_graph.create_from_text(text,questions)
+    text_graph.save_graph('textgraph.json')
     text_graph.load_graph('textgraph.json')
-    user_input = input("Start word:")
-    generated_text = text_graph.generate_text(user_input)
+    generated_text = text_graph.generate_text("the")
+    user_input = ""
+    print(i,"/", len( files))
+    i+=1
     if generated_text:
-        print("\n" + "Answering:", user_input, "\nAI:", generated_text, "\n\n")
+        print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
         with open(filename, "a", encoding="utf8") as f:
-            f.write("\n" +  "Answering: " + user_input + "\n" + generated_text + "\n")
+            f.write("\nUsing: " + file.strip() + " Answering: " + user_input + "\n" + generated_text + "\n")
