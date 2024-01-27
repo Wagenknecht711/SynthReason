@@ -1,4 +1,4 @@
-# SynthReason v0.9 *ULTRA*
+# SynthReason v0.91 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -77,8 +77,8 @@ with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
 filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
 random.shuffle(questions)
+text_graph.load_graph('textgraph.json')
 while(True):
-    text_graph.load_graph('textgraph.json')
     user_input = input("Start word:")
     generated_text = text_graph.generate_text(user_input)
     if generated_text:
