@@ -1,4 +1,4 @@
-# SynthReason v0.93 *ULTRA*
+# SynthReason v0.94 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 from collections import defaultdict
@@ -18,11 +18,13 @@ class TextGraph:
             if not next_nodes:
                 break
             next_words, weights = [], []
+            position = 0
             for node, edges in next_nodes.items():
                 total_weight = sum(edges.values())
                 if total_weight > 0:
                     next_words.append(node)
-                    weights.append(total_weight)
+                    weights.append(total_weight*(position+1))
+                    position += 1
             if not next_words:
                 break
             next_word = random.choices(next_words, weights=weights, k=1)[0]
