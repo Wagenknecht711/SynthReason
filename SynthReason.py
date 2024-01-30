@@ -1,4 +1,4 @@
-# SynthReason v1.2 *ULTRA*
+# SynthReason v1.21 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 from collections import defaultdict
@@ -42,14 +42,6 @@ class TextGraph:
             for v, w_dict in v_dict.items():
                 for w, weight in w_dict.items():
                     self.graph[u][v][w] = weight
-    def interleave_edges(self):
-        interleaved_graph = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        for u, v_dict in self.graph.items():
-            for v, w_dict in v_dict.items():
-                for w, weight in w_dict.items():
-                    # Swap u and v to interleave the edges
-                    interleaved_graph[v][u][w] = weight
-        return interleaved_graph
 text_graph = TextGraph()
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
@@ -60,8 +52,6 @@ random.shuffle(questions)
 text_graph.load_graph('textgraph.json')
 while(True):
     start_sequence = input("Start word:")
-
-    text_graph.interleave_edges()
     generated_text = text_graph.generate_text(text_graph.generate_text(start_sequence))
     if generated_text:
         print("\n" + "Answering:", start_sequence, "\nAI:", generated_text, "\n\n")
