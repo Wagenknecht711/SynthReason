@@ -1,59 +1,45 @@
-# SynthReason v1.21 *ULTRA*
+# SynthReason v1.31 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
-from collections import defaultdict
-import json
+import re
 import math
+token = "."
 size = 250
-class TextGraph:
-    def __init__(self):
-        self.graph = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-    def generate_text(self, start_sequence, size=250):
-        words = start_sequence.split()
-        if not words or any(word not in self.graph for word in words):
-            return "Start words not found or invalid."
-        current_word = words[-1]
-        generated_text = words[:]
-        text_length = len(words)
-        while text_length < size:
-            next_nodes = self.graph[current_word]
-            if not next_nodes:
-                break
-            next_words, weights = [], []
-            position = 0
-            for node, edges in next_nodes.items():
-                total_weight = sum(edges.values())
-                if total_weight > 0:
-                    next_words.append(node)
-                    weights.append(total_weight)
-                    position += 1
-            if not next_words:
-                break
-            next_word = random.choices(next_words, weights=weights, k=1)[0]
-            generated_text.append(next_word)
-            current_word = next_word
-            text_length += 1
-        return ' '.join(generated_text)
-    def load_graph(self, filename):
-        with open(filename, 'r') as f:
-            regular_dict = json.load(f)
-        self.graph = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        for u, v_dict in regular_dict.items():
-            for v, w_dict in v_dict.items():
-                for w, weight in w_dict.items():
-                    self.graph[u][v][w] = weight
-text_graph = TextGraph()
-with open("FileList.conf", encoding="ISO-8859-1") as f:
+with open("fileList.conf", encoding='ISO-8859-1') as f:
     files = f.read().splitlines()
-with open("questions.conf", encoding="ISO-8859-1") as f:
+print("SynthReason - Synthetic Dawn")
+with open("questions.conf", encoding='ISO-8859-1') as f:
     questions = f.read().splitlines()
-filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
-random.shuffle(questions)
-text_graph.load_graph('textgraph.json')
-while(True):
-    start_sequence = input("Start word:")
-    generated_text = text_graph.generate_text(text_graph.generate_text(start_sequence))
-    if generated_text:
-        print("\n" + "Answering:", start_sequence, "\nAI:", generated_text, "\n\n")
+ngram_size = 3
+while True:
+    user = re.sub('\W+', ' ', input("USER: ").lower())
+    random.shuffle(files)
+    for file in files:
+        with open(file, encoding='UTF-8') as f:
+            text = f.read()
+        sentences = text.split(token)
+        sentences = [sentence for sentence in sentences if any(word in sentence for word in user.split())]
+        random.shuffle(sentences)
+        sine_frequency, cosine_frequency, amplitude, phase = 5.2, 0.5, 0.4, 1.1  # Adjust as needed
+        ngrams = []
+        for sentence in sentences:
+            words = sentence.split()
+            for i in range(len(words) - ngram_size + 1):
+                ngram = words[i:i + ngram_size]
+                if len(ngram) == len(set(ngram)) and i % 3 == 0:  # Check for no repeated words
+                    ngram = " ".join(ngram)
+                    ngrams.append(ngram)
+        sine_values = [ngram.rfind(" ") / math.atan(4 / math.pi / sine_frequency * ngram.find(" ") + phase) for ngram in reversed(ngrams)]
+        degrees_values = [amplitude / math.degrees(2 / math.pi / cosine_frequency * i + phase) for i in sine_values]
+        combined_wave = [s * c for s, c in zip(sine_values, degrees_values)]
+        def custom_sort(item):
+            ngram, wave_value = item
+            return (-wave_value, len(ngram))
+        ngrams_with_wave = sorted(zip(ngrams, combined_wave), key=custom_sort, reverse=True)
+        selected_ngrams = [ngram.split() for ngram, _ in ngrams_with_wave][:size]
+        output_with_wave = ' '.join([' '.join(ngram) for ngram in selected_ngrams])
+        print("\nusing:", file.strip(), "answering:", user, "\nAI:", output_with_wave, "\n\n")
+        filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
         with open(filename, "a", encoding="utf8") as f:
-            f.write("\n" +  "Answering: " + start_sequence + "\n" + generated_text + "\n")
+            f.write("\nusing: " + file.strip() + " answering: " + user + "\n" + output_with_wave + "\n")
+        break
