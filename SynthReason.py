@@ -1,4 +1,4 @@
-# SynthReason v1.41 *ULTRA*
+# SynthReason v1.51 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -11,7 +11,7 @@ class Graph:
         self.aliases = {}
     def add_edge(self, u, v, w):
         weight = 1 
-        self.graph[u][v][w] += weight
+        self.graph[u][v][w] += (1/weight)
     def generate_text(self, start_word, text_length):
         if start_word not in self.graph:
             return "Word not found."
