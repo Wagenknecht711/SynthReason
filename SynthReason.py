@@ -1,4 +1,4 @@
-# SynthReason v1.4 *ULTRA*
+# SynthReason v1.41 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -14,7 +14,7 @@ class Graph:
         self.graph[u][v][w] += weight
     def generate_text(self, start_word, text_length):
         if start_word not in self.graph:
-            return "Start word not found."
+            return "Word not found."
         current_word = start_word
         generated_text = [current_word]
         while len(generated_text) < text_length:
@@ -65,7 +65,7 @@ for question in questions:
     for file in files:
         with open(file, encoding="UTF-8") as f:
             text = f.read()
-        user_input = input("Enter start word: ").strip().lower()
+        user_input = input("USER: ").strip().lower()
         if not user_input:
             continue
         user_words = re.sub("\W+", " ", user_input).split()
