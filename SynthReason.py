@@ -1,4 +1,4 @@
-# SynthReason v1.51 *ULTRA*
+# SynthReason v1.61 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -11,7 +11,7 @@ class Graph:
         self.aliases = {}
     def add_edge(self, u, v, w):
         weight = 1 
-        self.graph[u][v][w] += (1/weight)
+        self.graph[u][v][w] += weight
     def generate_text(self, start_word, text_length):
         if start_word not in self.graph:
             return "Word not found."
@@ -26,7 +26,7 @@ class Graph:
             total_weights = {}
             for node, edges in next_nodes.items():
                 total_weight = sum(edges.values())
-                total_weights[node] = total_weight
+                total_weights[node] = (1/total_weight)
             if sum(total_weights.values()) <= 0:
                 break
             for node, total_weight in total_weights.items():
