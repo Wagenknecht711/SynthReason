@@ -1,9 +1,9 @@
-# SynthReason v1.7 *ULTRA*
+# SynthReason v1.81 *ULTRA*
 # Copyright 2024 George Wagenknecht
+import re
 import random
-from collections import defaultdict
-import json
 import math
+from collections import defaultdict
 size = 250
 class Graph:
     def __init__(self):
@@ -32,31 +32,48 @@ class Graph:
             for node, total_weight in total_weights.items():
                 if total_weight > 0:
                     next_words.append(node)
-                    weights.append(len(next_words) * math.log2(1 / total_weight + 1))
+                    weights.append(total_weight * math.log2(1 / len(node) + 1))
             next_word = random.choices(next_words, weights=weights, k=1)[0]
             generated_text.append(next_word)
             current_word = next_word
         return ' '.join(generated_text)
-    def load_graph(self, filename):
-        with open(filename, 'r') as f:
-            regular_dict = json.load(f)
-        self.graph = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        for u, v_dict in regular_dict.items():
-            for v, w_dict in v_dict.items():
-                for w, weight in w_dict.items():
-                    self.graph[u][v][w] = weight
-text_graph = Graph()
+def preprocess_text(text, user_words):
+    sentences = re.split(r'(?<=[.!?])\s+', text.lower())
+    user_words_set = set(user_words)
+    filtered_words = [word for sentence in sentences for word in sentence.split() if user_words_set.intersection(sentence.split())]
+    return filtered_words
+def create_word_graph(text, user_words, n=3):
+    words = text.split()
+    word_graph = Graph()
+    aliases = {}
+    for i in range(len(words) - n + 1):
+        ngram = tuple(words[i:i + n])
+        if ngram in aliases:
+            word_graph.add_edge(*aliases[ngram])
+        else:
+            aliases[ngram] = words[i:i + n]
+            word_graph.add_edge(*ngram)
+    return word_graph
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
 filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
 random.shuffle(questions)
-text_graph.load_graph('textgraph.json')
-while(True):
-    start_sequence = input("Start word:")
-    generated_text = text_graph.generate_text(start_sequence,size)
-    if generated_text:
-        print("\n" + "Answering:", start_sequence, "\nAI:", generated_text, "\n\n")
-        with open(filename, "a", encoding="utf8") as f:
-            f.write("\n" +  "Answering: " + start_sequence + "\n" + generated_text + "\n")
+for question in questions:
+    random.shuffle(files)
+    for file in files:
+        with open(file, encoding="UTF-8") as f:
+            text = f.read()
+        user_input = input("USER: ").strip().lower()
+        if not user_input:
+            continue
+        user_words = re.sub("\W+", " ", user_input).split()
+        filtered_text = ' '.join(preprocess_text(text, user_words))
+        word_graph = create_word_graph(filtered_text, user_input)
+        generated_text = word_graph.generate_text(user_words[-1], size)
+        if generated_text:
+            print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
+            with open(filename, "a", encoding="utf8") as f:
+                f.write("\nUsing: " + file.strip() + " Answering: " + user_input + "\n" + generated_text + "\n")
+            break
