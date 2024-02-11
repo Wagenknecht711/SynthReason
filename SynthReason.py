@@ -1,4 +1,4 @@
-# SynthReason v3.0 *ULTRA*
+# SynthReason v3.1 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -58,6 +58,7 @@ with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
+random.shuffle(questions)
 while(True):
     random.shuffle(files)
     for file in files:
@@ -71,3 +72,4 @@ while(True):
         print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
         with open(filename, "a", encoding="utf8") as f:
             f.write("\nUsing: " + file.strip() + " Answering: " + user_input + "\n" + generated_text + "\n")
+        break
