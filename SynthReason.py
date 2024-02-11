@@ -1,4 +1,4 @@
-# SynthReason v3.1 *ULTRA*
+# SynthReason v3.2 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -49,8 +49,7 @@ def create_word_graph(ngrams, n=3):
     for i in range(len(ngrams)-1):
         ngram, next_word = ngrams[i], ngrams[i+1][-1]
         word_graph.add_edge(ngram, next_word)
-        if i == 0 or ngrams[i-1][-1] in '.!?':
-            word_graph.add_start(ngram)
+        word_graph.add_start(ngram)
     word_graph.calculate_probabilities()
     return word_graph
 filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
