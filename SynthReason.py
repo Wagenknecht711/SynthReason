@@ -1,4 +1,4 @@
-# SynthReason v2.0 *ULTRA*
+# SynthReason v2.1 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -36,11 +36,13 @@ class Graph:
             generated_text.append(next_word)
             current_word = next_word
         return ' '.join(generated_text)
-def preprocess_text(text):
+def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
-    return [word for sentence in sentences for word in sentence.split()]
+    user_words_set = set(user_words)
+    filtered_words = [word for sentence in sentences for word in sentence.split() if user_words_set.intersection(sentence.split())]
+    return filtered_words
 def create_word_graph(text, n=3):
-    words = preprocess_text(text)
+    words = text.split()
     word_graph = Graph()
     for i in range(len(words)-1):
         start, next_word = words[i], words[i + 1]
@@ -64,7 +66,7 @@ for question in questions:
         if not user_input:
             continue
         user_words = re.sub("\W+", " ", user_input).split()
-        filtered_text = ' '.join(preprocess_text(text))
+        filtered_text = ' '.join(preprocess_text(text,user_words))
         word_graph = create_word_graph(filtered_text, user_input)
         generated_text = word_graph.generate_text(user_words[-1], size)
         if generated_text:
