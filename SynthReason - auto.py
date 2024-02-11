@@ -58,12 +58,12 @@ with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
-while(True):
+for question in questions:
     random.shuffle(files)
     for file in files:
         with open(file, encoding="UTF-8") as f:
             text = f.read()
-        user_input = input("USER: ").strip().lower()
+        user_input = question.strip().lower()
         ngrams = preprocess_text(text, user_input, n)
         start_ngram = random.choice(ngrams[:-1])
         word_graph = create_word_graph(ngrams, n)
