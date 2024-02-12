@@ -1,4 +1,4 @@
-# SynthReason v6.0 *ULTRA*
+# SynthReason v6.1 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -37,10 +37,15 @@ class Graph:
             if not probabilities:
                 break
             next_words, probs = zip(*probabilities)
-            next_word = random.choices(next_words, weights=probs, k=1)[0]
+            
+            # Update probabilities based on the current word
+            updated_probs = [self.transition_probabilities[generated_text[-1]][next_word] for next_word in next_words]
+            next_word = random.choices(next_words, weights=updated_probs, k=1)[0]
+            
             generated_text.append(next_word)
             current_word = next_word
         return ' '.join(generated_text)
+
 
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
