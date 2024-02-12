@@ -1,4 +1,4 @@
-# SynthReason v4.0 *ULTRA*
+# SynthReason v5.0 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -39,7 +39,7 @@ class Graph:
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
     user_words_set = set(user_words)
-    filtered_words = [word for sentence in sentences for word in sentence.split() if user_words_set.intersection(sentence.split())]
+    filtered_words = [word for sentence in sentences for word in sentence.split() if set(sentence.split()).intersection(user_words_set)]
     return filtered_words
 def create_word_graph(text, n=3):
     words = text.split()
