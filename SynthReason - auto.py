@@ -1,4 +1,4 @@
-# SynthReason v5.1 *ULTRA*
+# SynthReason v5.2 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -44,11 +44,11 @@ def preprocess_text(text, user_words):
 def create_word_graph(text, n=3):
     words = text.split()
     word_graph = Graph()
-    for i in range(len(words)-1):
-        start, next_word = words[i], words[i + 1]
+    for i in range(len(words)-5):
+        start, next_word = words[i+4], words[i + 5]
         word_graph.add_edge(start, next_word)
         if i == 0 or words[i-1] in '.!?':
-            word_graph.add_start(words[i+4])
+            word_graph.add_start(words[i])
     word_graph.calculate_probabilities()
     return word_graph
 with open("FileList.conf", encoding="ISO-8859-1") as f:
@@ -67,9 +67,8 @@ for question in questions:
             continue
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text,user_words))
-        word_graph = create_word_graph(filtered_text, user_input)
+        word_graph = create_word_graph(filtered_text, questions)
         generated_text = word_graph.generate_text(user_words[-1], size)
-        
         if generated_text:
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
