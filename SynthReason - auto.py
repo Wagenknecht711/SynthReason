@@ -1,74 +1,78 @@
-# SynthReason v3.2 *ULTRA*
+# SynthReason v4.0 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 from collections import defaultdict
 size = 250
-n = 3
 class Graph:
     def __init__(self):
         self.graph = defaultdict(lambda: defaultdict(int))
         self.transition_probabilities = defaultdict(lambda: defaultdict(float))
         self.start_probabilities = defaultdict(float)
         self.total_starts = 0
-    def add_edge(self, ngram, next_word):
-        self.graph[ngram][next_word] += 1
+    def add_edge(self, u, v):
+        self.graph[u][v] += 1
     def calculate_probabilities(self):
-        for ngram in self.graph.keys():
-            total_outgoing = sum(self.graph[ngram].values())
-            for next_word in self.graph[ngram]:
-                self.transition_probabilities[ngram][next_word] = self.graph[ngram][next_word] / total_outgoing
+        for u in self.graph.keys():
+            total_outgoing = sum(self.graph[u].values())
+            for v in self.graph[u]:
+                self.transition_probabilities[u][v] = self.graph[u][v] / total_outgoing
         for start in self.start_probabilities.keys():
-            self.start_probabilities[start] = self.start_probabilities[start] / self.total_starts
+            self.start_probabilities[start] += self.total_starts
     def add_start(self, start):
         self.start_probabilities[start] += 1
         self.total_starts += 1
-    def generate_text(self, start_ngram, text_length):
-        if start_ngram not in self.transition_probabilities:
-            return "Start n-gram not found."
-        current_ngram = start_ngram
-        generated_text = list(current_ngram)
+    def generate_text(self, start_word, text_length):
+        if start_word not in self.transition_probabilities:
+            return "Word not found."  
+        current_word = start_word
+        generated_text = [current_word]
         while len(generated_text) < text_length:
-            probabilities = list(self.transition_probabilities[current_ngram].items())
+            probabilities = list(self.transition_probabilities[current_word].items())
             if not probabilities:
                 break
             next_words, probs = zip(*probabilities)
             next_word = random.choices(next_words, weights=probs, k=1)[0]
             generated_text.append(next_word)
-            if len(generated_text) > len(start_ngram):
-                current_ngram = tuple(generated_text[-len(start_ngram):])
+            current_word = next_word
         return ' '.join(generated_text)
-def preprocess_text(text, user_words, n):
+def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
-    user_words_set = set(user_words.split())
+    user_words_set = set(user_words)
     filtered_words = [word for sentence in sentences for word in sentence.split() if user_words_set.intersection(sentence.split())]
-    ngrams = [tuple(filtered_words[i:i+n]) for i in range(len(filtered_words)-n+1)]
-    return ngrams
-def create_word_graph(ngrams, n=3):
+    return filtered_words
+def create_word_graph(text, n=3):
+    words = text.split()
     word_graph = Graph()
-    for i in range(len(ngrams)-1):
-        ngram, next_word = ngrams[i], ngrams[i+1][-1]
-        word_graph.add_edge(ngram, next_word)
-        word_graph.add_start(ngram)
+    for i in range(len(words)-1):
+        start, next_word = words[i], words[i + 1]
+        word_graph.add_edge(start, next_word)
+        if i == 0 or words[i-1] in '.!?':
+            word_graph.add_start(start)
     word_graph.calculate_probabilities()
     return word_graph
-filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
+filename = "Compendium#" + str(random.randint(0, 10000000)) + ".txt"
 random.shuffle(questions)
 for question in questions:
     random.shuffle(files)
     for file in files:
         with open(file, encoding="UTF-8") as f:
             text = f.read()
-        user_input = question.strip().lower()
-        ngrams = preprocess_text(text, user_input, n)
-        start_ngram = random.choice(ngrams[:-1])
-        word_graph = create_word_graph(ngrams, n)
-        generated_text = word_graph.generate_text(start_ngram, size)
-        print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
-        with open(filename, "a", encoding="utf8") as f:
-            f.write("\nUsing: " + file.strip() + " Answering: " + user_input + "\n" + generated_text + "\n")
-        break
+        user_input = questions.strip().lower()
+        if not user_input:
+            continue
+        user_words = re.sub("\W+", " ", user_input).split()
+        filtered_text = ' '.join(preprocess_text(text,user_words))
+        word_graph = create_word_graph(filtered_text, user_input)
+        generated_text = word_graph.generate_text(user_words[-1], size)
+        word_graph = create_word_graph(generated_text, user_input)
+        generated_text = word_graph.generate_text(user_words[-1], size)
+        if generated_text:
+            print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
+            with open(filename, "a", encoding="utf8") as f:
+                f.write("\nUsing: " + file.strip() + " Answering: " + user_input + "\n" + generated_text + "\n")
+            break
