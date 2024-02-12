@@ -1,4 +1,4 @@
-# SynthReason v5.2 *ULTRA*
+# SynthReason v5.3 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -17,8 +17,8 @@ class Graph:
             total_outgoing = sum(self.graph[u].values())
             for v in self.graph[u]:
                 self.transition_probabilities[u][v] = self.graph[u][v] / total_outgoing
-        for start in self.start_probabilities.keys():
-            self.start_probabilities[start] += self.total_starts
+                for start in self.start_probabilities.keys():
+                    self.transition_probabilities[u][v] += self.total_starts
     def add_start(self, start):
         self.start_probabilities[start] += 1
         self.total_starts += 1
