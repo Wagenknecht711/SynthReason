@@ -1,4 +1,4 @@
-# SynthReason v6.3 *ULTRA*
+# SynthReason v6.5 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -27,7 +27,7 @@ class Graph:
         self.start_probabilities[start] += 1
         self.total_starts += 1
 
-    def generate_text(self, start_word, text, text_length):
+    def generate_text(self, start_word,text, text_length):
         if start_word not in self.transition_probabilities:
             return "Word not found."  
     
@@ -49,14 +49,18 @@ class Graph:
                 default_prob = 1 / len(next_words)
             
             # Update probabilities based on the current word
-            for i in text[:size]:
-                updated_probs = [self.transition_probabilities[next_word].get(i, default_prob) for next_word in next_words]
+            updated_probs = [self.transition_probabilities[next_word].get(i, default_prob) for i, next_word in enumerate(next_words)]
+            
+            # Update transition probabilities
+            for next_word, updated_prob in zip(next_words, updated_probs):
+                self.transition_probabilities[current_word][next_word] = updated_prob
             
             next_word = random.choices(next_words, weights=updated_probs, k=1)[0]
             generated_text.append(next_word)
             current_word = next_word
     
         return ' '.join(generated_text)
+
 
 
 def preprocess_text(text, user_words):
@@ -90,7 +94,7 @@ for question in questions:
     for file in files:
         with open(file, encoding="UTF-8") as f:
             text = f.read()
-        user_input = question.strip().lower()
+        user_input =  question.strip().lower()
         if not user_input:
             continue
         user_words = re.sub("\W+", " ", user_input).split()
