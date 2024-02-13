@@ -1,4 +1,4 @@
-# SynthReason v6.1 *ULTRA*
+# SynthReason v6.3 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -27,23 +27,35 @@ class Graph:
         self.start_probabilities[start] += 1
         self.total_starts += 1
 
-    def generate_text(self, start_word, text_length):
+    def generate_text(self, start_word, text, text_length):
         if start_word not in self.transition_probabilities:
             return "Word not found."  
+    
         current_word = start_word
         generated_text = [current_word]
+    
         while len(generated_text) < text_length:
-            probabilities = list(self.transition_probabilities[current_word].items())
-            if not probabilities:
-                break
-            next_words, probs = zip(*probabilities)
+            if current_word not in self.transition_probabilities:
+                # If current word has no associated probabilities, add default probabilities
+                next_words = list(self.graph[current_word].keys())
+                default_prob = 1 / len(next_words)
+            else:
+                # Use existing probabilities
+                probabilities = list(self.transition_probabilities[current_word].items())
+                if not probabilities:
+                    break
+                next_words, probs = zip(*probabilities)
+                # Calculate default probability based on the number of next words
+                default_prob = 1 / len(next_words)
             
             # Update probabilities based on the current word
-            updated_probs = [self.transition_probabilities[generated_text[-1]][next_word] for next_word in next_words]
-            next_word = random.choices(next_words, weights=updated_probs, k=1)[0]
+            for i in text[:size]:
+                updated_probs = [self.transition_probabilities[next_word].get(i, default_prob) for next_word in next_words]
             
+            next_word = random.choices(next_words, weights=updated_probs, k=1)[0]
             generated_text.append(next_word)
             current_word = next_word
+    
         return ' '.join(generated_text)
 
 
@@ -84,7 +96,7 @@ for question in questions:
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text,user_words))
         word_graph = create_word_graph(filtered_text)
-        generated_text = word_graph.generate_text(user_words[-1], size)
+        generated_text = word_graph.generate_text(user_words[-1],filtered_text.split(), size)
         if generated_text:
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
