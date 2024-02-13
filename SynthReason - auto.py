@@ -1,4 +1,4 @@
-# SynthReason v6.5 *ULTRA*
+# SynthReason v6.6 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -8,59 +8,45 @@ size = 250
 
 class Graph:
     def __init__(self):
-        self.graph = defaultdict(lambda: defaultdict(int))
+        self.graph = defaultdict(list)  # Initialize graph as a defaultdict with list values
         self.transition_probabilities = defaultdict(lambda: defaultdict(float))
         self.start_probabilities = defaultdict(float)
         self.total_starts = 0
 
-    def add_edge(self, u, v):
-        self.graph[u][v] += 1
+    def add_edge(self, u, v, index1, index2):
+        # Add v to the list of adjacent vertices for vertex u
+        self.graph[u].append((v, index1, index2))
 
     def calculate_probabilities(self):
-        for u in self.graph.keys():
-            total_outgoing = sum(self.graph[u].values())
-            for v in self.graph[u]:
-                self.transition_probabilities[u][v] = self.graph[u][v] / total_outgoing
-                for start in self.start_probabilities.keys():
-                    self.start_probabilities[start] /= self.transition_probabilities[u][v]
+        for u, adjacent_vertices in self.graph.items():
+            total_outgoing = len(adjacent_vertices)
+            for v, _, _ in adjacent_vertices:  # Extract only the vertex v from each tuple
+                self.transition_probabilities[u][v] = 1 / total_outgoing
+
     def add_start(self, start):
         self.start_probabilities[start] += 1
         self.total_starts += 1
 
-    def generate_text(self, start_word,text, text_length):
+    def generate_text(self, start_word, text_length):
         if start_word not in self.transition_probabilities:
-            return "Word not found."  
-    
+            return "Word not found."
+
         current_word = start_word
         generated_text = [current_word]
-    
+
         while len(generated_text) < text_length:
             if current_word not in self.transition_probabilities:
-                # If current word has no associated probabilities, add default probabilities
-                next_words = list(self.graph[current_word].keys())
-                default_prob = 1 / len(next_words)
-            else:
-                # Use existing probabilities
-                probabilities = list(self.transition_probabilities[current_word].items())
-                if not probabilities:
-                    break
-                next_words, probs = zip(*probabilities)
-                # Calculate default probability based on the number of next words
-                default_prob = 1 / len(next_words)
-            
-            # Update probabilities based on the current word
-            updated_probs = [self.transition_probabilities[next_word].get(i, default_prob) for i, next_word in enumerate(next_words)]
-            
-            # Update transition probabilities
-            for next_word, updated_prob in zip(next_words, updated_probs):
-                self.transition_probabilities[current_word][next_word] = updated_prob
-            
-            next_word = random.choices(next_words, weights=updated_probs, k=1)[0]
+                # If current word has no associated probabilities, break
+                break
+
+            next_words = list(self.transition_probabilities[current_word].keys())
+            probs = list(self.transition_probabilities[current_word].values())
+
+            next_word = random.choices(next_words, weights=probs, k=1)[0]
             generated_text.append(next_word)
             current_word = next_word
-    
-        return ' '.join(generated_text)
 
+        return ' '.join(generated_text)
 
 
 def preprocess_text(text, user_words):
@@ -72,10 +58,13 @@ def preprocess_text(text, user_words):
 def create_word_graph(text):
     words = text.split()
     word_graph = Graph()
-    for i in range(len(words)-5):
-        start, next_word = words[i+4], words[i + 5]
-        word_graph.add_edge(start, next_word)
-        if i == 0 or words[i-1] in '.!?':
+    for i in range(len(words) - 8):
+        start = words[i + 4]
+        next_word = words[i + 5]
+        index1 = words[i + 6]
+        index2 = words[i + 7]
+        word_graph.add_edge(start, next_word, index1, index2)
+        if i == 0 or words[i - 1] in '.!?':
             word_graph.add_start(start)
     word_graph.calculate_probabilities()
     return word_graph
@@ -94,13 +83,13 @@ for question in questions:
     for file in files:
         with open(file, encoding="UTF-8") as f:
             text = f.read()
-        user_input =  question.strip().lower()
+        user_input = question.strip().lower()
         if not user_input:
             continue
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text,user_words))
         word_graph = create_word_graph(filtered_text)
-        generated_text = word_graph.generate_text(user_words[-1],filtered_text.split(), size)
+        generated_text = word_graph.generate_text(user_words[-1], size)
         if generated_text:
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
