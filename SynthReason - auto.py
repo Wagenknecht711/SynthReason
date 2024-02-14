@@ -1,4 +1,4 @@
-# SynthReason v8.0 *ULTRA*
+# SynthReason v8.1 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -27,7 +27,7 @@ class HiddenMarkovModel:
             self.transitions[u][v] += 1
         for i in range(len(words)):
             state = self.word_to_index[words[i]]
-            self.emission_probs[-2][-1] += i
+            self.emission_probs[-2][-1] += 1
         self.initial_probs[self.word_to_index[words[-1]]] += 1
         self.transitions /= self.transitions.sum(axis=1, keepdims=True)
         self.initial_probs /= self.initial_probs.sum()
