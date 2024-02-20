@@ -1,22 +1,18 @@
+# SynthReason v8.5 *ULTRA*
+# Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
-
 size = 250
 memoryLimiter = 50000
-
 def fit_hmm(text):
     words = text.split()
     unique_words = list(set(words))
     num_states = len(unique_words)
-    
-    # Initialize transition, initial probability, and emission probability matrices
     transitions = np.zeros((num_states, num_states))
     initial_probs = np.zeros(num_states)
     emission_probs = np.zeros((num_states, num_states))
-    emission_probs_index = {}  # New dictionary to map words to emission probabilities index
-    
-    # Fill in transition, initial probability, and emission probability matrices
+    emission_probs_index = {}  
     for i in range(len(words) - 1):
         u = unique_words.index(words[i])
         v = unique_words.index(words[i + 1])
@@ -25,18 +21,13 @@ def fit_hmm(text):
         state = unique_words.index(words[i])
         emission_probs[unique_words.index(words[i])][unique_words.index(words[i+4])] += 1
         if words[i] not in emission_probs_index:
-            emission_probs_index[words[i]] = state  # Map word to its emission probabilities index
+            emission_probs_index[words[i]] = state
         if i == 0:
             initial_probs[state] += 1
-            
-    # Normalize matrices
     transitions /= transitions.sum(axis=1, keepdims=True)
     initial_probs /= initial_probs.sum()
     emission_probs /= emission_probs.sum(axis=1, keepdims=True)
-    
     return transitions, initial_probs, emission_probs, unique_words, emission_probs_index
-
-
 def generate_text_hmm(transitions, initial_probs, emission_probs, unique_words, start_word, emission_probs_index, text_length):
     if start_word not in emission_probs_index:
         return "Word not found."
@@ -48,22 +39,17 @@ def generate_text_hmm(transitions, initial_probs, emission_probs, unique_words, 
         generated_text.append(next_word)
         current_state = next_state
     return ' '.join(generated_text)
-
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
     user_words_set = set(user_words)
     filtered_words = [word for sentence in sentences for word in sentence.split() if set(sentence.split()).intersection(user_words_set)]
     return filtered_words
-
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
-
 with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
-
 random_number = random.randint(0, 10000000)
 filename = "Compendium#" + str(random_number) + ".txt"
-
 while True:
     random.shuffle(files)
     for file in files:
