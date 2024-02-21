@@ -1,9 +1,11 @@
-# SynthReason v9.0 *ULTRA*
+# SynthReason v9.2 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
 size = 250
+n = 2
+num_choices = 3
 memoryLimiter = 50000
 def fit_hmm(text):
     words = text.split()
@@ -25,16 +27,25 @@ def fit_hmm(text):
     initial_probs /= initial_probs.sum()
     emission_probs /= emission_probs.sum(axis=1, keepdims=True)
     return transitions, initial_probs, emission_probs, unique_words, emission_probs_index
-def generate_text_hmm(transitions, initial_probs, emission_probs, unique_words, start_word, emission_probs_index, text_length):
+def generate_text_hmm(transitions, initial_probs, emission_probs, unique_words, start_word, emission_probs_index, text_length, n, num_choices):
     if start_word not in emission_probs_index:
         return "Word not found."
     generated_text = []
     current_state = unique_words.index(start_word)
-    for _ in range(1, text_length):
+    for _ in range(n - 1):
         next_state = np.random.choice(len(transitions[current_state]), p=transitions[current_state])
-        next_word = np.random.choice(list(emission_probs_index[unique_words[current_state]]))
+        next_word = np.random.choice(list(emission_probs_index.get(unique_words[current_state], [])))
         generated_text.append(next_word)
-        current_state = next_state
+        current_state = unique_words.index(next_word)
+    for _ in range(text_length - n):
+        next_states = np.random.choice(len(transitions[current_state]), size=num_choices, p=transitions[current_state])
+        next_words = []
+        for state in next_states:
+            next_word = np.random.choice(list(emission_probs_index.get(unique_words[state], [])))
+            next_words.append(next_word)
+        chosen_word = np.random.choice(next_words)
+        generated_text.append(chosen_word)
+        current_state = unique_words.index(chosen_word)
     return ' '.join(generated_text)
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
@@ -47,7 +58,7 @@ with open("questions.conf", encoding="ISO-8859-1") as f:
     questions = f.read().splitlines()
 random_number = random.randint(0, 10000000)
 filename = "Compendium#" + str(random_number) + ".txt"
-while True:
+while(True):
     random.shuffle(files)
     user_input = input("USER: ").strip().lower() 
     for file in files:
@@ -56,7 +67,7 @@ while True:
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words))[:memoryLimiter]
         transitions, initial_probs, emission_probs, unique_words, emission_probs_index = fit_hmm(filtered_text)
-        generated_text = generate_text_hmm(transitions, initial_probs, emission_probs, unique_words, user_words[-1], emission_probs_index, size)
+        generated_text = generate_text_hmm(transitions, initial_probs, emission_probs, unique_words, user_words[-1], emission_probs_index, size, n, num_choices)
         if len(generated_text) > len("Word not found."):
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
