@@ -1,4 +1,4 @@
-# SynthReason v9.2 *ULTRA*
+# SynthReason v9.3 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -34,14 +34,14 @@ def generate_text_hmm(transitions, initial_probs, emission_probs, unique_words, 
     current_state = unique_words.index(start_word)
     for _ in range(n - 1):
         next_state = np.random.choice(len(transitions[current_state]), p=transitions[current_state])
-        next_word = np.random.choice(list(emission_probs_index.get(unique_words[current_state], [])))
+        next_word = np.random.choice(list(emission_probs_index.get(unique_words[current_state], [current_state])))
         generated_text.append(next_word)
         current_state = unique_words.index(next_word)
     for _ in range(text_length - n):
         next_states = np.random.choice(len(transitions[current_state]), size=num_choices, p=transitions[current_state])
         next_words = []
         for state in next_states:
-            next_word = np.random.choice(list(emission_probs_index.get(unique_words[state], [])))
+            next_word = np.random.choice(list(emission_probs_index.get(unique_words[state], [current_state])))
             next_words.append(next_word)
         chosen_word = np.random.choice(next_words)
         generated_text.append(chosen_word)
