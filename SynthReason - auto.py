@@ -1,4 +1,4 @@
-# SynthReason v9.5 *ULTRA*
+# SynthReason v9.6 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -29,7 +29,7 @@ def fit_hmm(text):
                 transitions /= transitions.sum(axis=1, keepdims=True)
                 initial_probs /= initial_probs.sum()
                 emission_probs /= emission_probs.sum(axis=1, keepdims=True)
-                ratio = transitions / transitions[j][i]
+                ratio = emission_probs / transitions[j][i]
     return transitions, initial_probs, emission_probs, unique_words, emission_probs_index
 def generate_text_hmm(transitions, initial_probs, emission_probs, unique_words, start_word, emission_probs_index, text_length, n, num_choices):
     if start_word not in emission_probs_index:
