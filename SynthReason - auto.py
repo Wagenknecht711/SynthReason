@@ -1,4 +1,4 @@
-# SynthReason v9.7 *ULTRA*
+# SynthReason v9.8 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -8,21 +8,22 @@ n = 2
 num_choices = 3
 memoryLimiter = 50000
 cognitionThreshold = 10000
-def fit_hmm(text):
+def fit(text):
     words = text.split()
     unique_words = list(set(words))
     num_states = len(unique_words)
     transitions = np.zeros((num_states, num_states))
     for i in range(len(words) - 1):
         u, v = unique_words.index(words[i]), unique_words.index(words[i + 1])
-        transitions[u][v] += cognitionThreshold
+        if u > 1 and v > 1:
+            transitions[u][v] += cognitionThreshold
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
     for i in range(num_states):
         if row_sums[i] == 0:
             transitions[i] = np.ones(num_states) / num_states
     return transitions, unique_words
-def generate_text_hmm(transitions, unique_words , start_word, text_length, n, num_choices):
+def generate_text(transitions, unique_words , start_word, text_length, n, num_choices):
     if start_word not in unique_words:
         return "Word not found."
     generated_text = [start_word]
@@ -53,8 +54,8 @@ for question in questions:
             text = f.read() 
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words))[:memoryLimiter]
-        transitions, unique_words = fit_hmm(filtered_text)
-        generated_text = generate_text_hmm(transitions, unique_words, user_words[-1], size, n, num_choices)
+        transitions, unique_words = fit(filtered_text)
+        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n, num_choices)
         if len(generated_text) > len("Word not found."):
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
