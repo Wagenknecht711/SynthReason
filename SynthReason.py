@@ -1,4 +1,4 @@
-# SynthReason v10.1 *ULTRA*
+# SynthReason v10.2 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -13,7 +13,7 @@ sine_frequency = 50.2
 amplitude = 10.4
 phase = 11.1
 def fit(text):
-    words = text.split()
+    words = text.lower().split()
     unique_words = list(set(words))
     num_states = len(unique_words)
     transitions = np.zeros((num_states, num_states))
@@ -21,7 +21,9 @@ def fit(text):
         u, v = unique_words.index(words[i]), unique_words.index(words[i + 1])
         if u > 1 and v > 1:
             transitions[u][v] += cognitionThreshold
-    transitions *= np.array([amplitude * math.atan(2/ math.pi / sine_frequency * i + phase) for i in range(len(transitions))])
+    keyword_frequencies = {keyword: words.count(keyword) for keyword in unique_words}
+    spatial_frequency_range = np.array([keyword_frequencies[keyword] for keyword in unique_words])
+    transitions *= np.array([amplitude * math.atan(2/ math.pi / sine_frequency * i + phase) for i in spatial_frequency_range])
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
     for i in range(num_states):
