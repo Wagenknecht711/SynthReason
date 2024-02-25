@@ -1,4 +1,4 @@
-# SynthReason v9.9 *ULTRA*
+# SynthReason v10.0 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -11,7 +11,7 @@ memoryLimiter = 50000
 cognitionThreshold = 10000
 sine_frequency = 5.2
 cosine_frequency= 0.5
-amplitude = 110.4
+amplitude = 10.4
 phase = 1.1
 def fit(text):
     words = text.split()
