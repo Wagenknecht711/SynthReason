@@ -1,4 +1,4 @@
-# SynthReason v10.2 *ULTRA*
+# SynthReason v10.3 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -30,17 +30,24 @@ def fit(text):
         if row_sums[i] == 0:
             transitions[i] = np.ones(num_states) / num_states
     return transitions, unique_words
-def generate_text(transitions, unique_words , start_word, text_length, n, num_choices):
+def generate_text(transitions, unique_words, start_word, text_length, n, num_choices):
     if start_word not in unique_words:
         return "Word not found."
     generated_text = [start_word]
     current_state = unique_words.index(start_word)
+    snake_direction = 1
     for _ in range(text_length - n):
-        next_states = np.random.choice(len(transitions[current_state]), size=num_choices, p=transitions[current_state])
-        next_words = {unique_words[state] for state in next_states}  # Initialize with possible next states
-        chosen_word = random.choice(list(next_words))
-        generated_text.append(chosen_word)
-        current_state = unique_words.index(chosen_word)
+        next_states = np.arange(len(transitions[current_state]))
+        probabilities = transitions[current_state]   
+        if snake_direction == 1:
+            next_state = np.random.choice(next_states, p=probabilities)
+        else:
+            next_state = np.random.choice(next_states[::-1], p=probabilities[::-1])
+        next_word = unique_words[next_state]
+        generated_text.append(next_word)
+        if next_state == len(unique_words) - 1 or next_state == 0:
+            snake_direction *= -1
+        current_state = next_state
     return ' '.join(generated_text)
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
