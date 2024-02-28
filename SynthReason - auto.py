@@ -1,4 +1,4 @@
-# SynthReason v10.5 *ULTRA*
+# SynthReason v10.6 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -10,8 +10,8 @@ num_choices = 3
 memoryLimiter = 50000
 cognitionThreshold = 10000
 sine_frequency = 50.2
-amplitude = 10.4
-phase = 11.1
+amplitude = 100.4
+phase = 71.1
 def fit(text):
     words = text.lower().split()
     unique_words = list(set(words))
