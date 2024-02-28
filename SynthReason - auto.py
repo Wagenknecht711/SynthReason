@@ -1,11 +1,11 @@
-# SynthReason v10.4 *ULTRA*
+# SynthReason v10.5 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
 import math
 size = 250
-n = 2
+n = 3
 num_choices = 3
 memoryLimiter = 50000
 cognitionThreshold = 10000

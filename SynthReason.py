@@ -1,11 +1,11 @@
-# SynthReason v10.4 *ULTRA*
+# SynthReason v10.5 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
 import math
 size = 250
-n = 2
+n = 3
 num_choices = 3
 memoryLimiter = 50000
 cognitionThreshold = 10000
@@ -55,6 +55,9 @@ def preprocess_text(text, user_words):
     return [word for sentence in sentences for word in sentence.split() if set(sentence.split()).intersection(user_words_set)]
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
+with open("questions.conf", encoding="ISO-8859-1") as f:
+    questions = f.read().splitlines()
+random.shuffle(questions)
 random_number = random.randint(0, 10000000)
 filename = "Compendium#" + str(random_number) + ".txt"
 while True:
