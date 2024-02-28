@@ -1,4 +1,4 @@
-# SynthReason v10.7 *ULTRA*
+# SynthReason v10.8 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -21,7 +21,7 @@ def fit(text):
         u, v = unique_words.index(words[i]), unique_words.index(words[i + 1])
         if u > 1 and v > 1:
             transitions[u][v] += cognitionThreshold
-    keyword_frequencies = {keyword: text.rfind(keyword) for keyword in unique_words}
+    keyword_frequencies = {keyword: words.index(keyword) for keyword in unique_words}
     spatial_frequency_range = np.array([keyword_frequencies[keyword] for keyword in unique_words])
     transitions *= np.array([amplitude * math.atan(2/ math.pi / sine_frequency * i + phase) for i in spatial_frequency_range])
     row_sums = transitions.sum(axis=1, keepdims=True)
@@ -46,13 +46,13 @@ def generate_text(transitions, unique_words, start_word, text_length, n, num_cho
         next_word = unique_words[next_state]
         generated_text.append(next_word)
         if next_state == len(unique_words) - 1 or next_state == 0:
-            snake_direction *= -1
+            snake_direction *= next_state
         current_state = next_state
     return ' '.join(generated_text)
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
     user_words_set = set(user_words)
-    return [word for sentence in sentences for word in sentence.split() if set(sentence.split()).intersection(user_words_set)]
+    return [word for sentence in sentences for word in sentence.split() if set(sentence.split()).difference(user_words_set)]
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
