@@ -1,4 +1,4 @@
-# SynthReason v11.1 *ULTRA*
+# SynthReason v11.2 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -18,13 +18,15 @@ def fit(text):
     unique_words = list(set(words))
     num_states = len(unique_words)
     transitions = np.zeros((num_states, num_states))
-    for i in range(len(words) - 1):
-        u, v = unique_words.index(words[i]), unique_words.index(words[i + 1])
-        if u > 1 and v > 1:
-            transitions[u][v] += cognitionThreshold
     keyword_frequencies = {keyword: words.index(keyword) for keyword in unique_words}
     spatial_frequency_range = np.array([keyword_frequencies[keyword] for keyword in unique_words])
-    transitions *= np.array([amplitude * math.atan(magic/ math.pi / sine_frequency * i + phase) for i in spatial_frequency_range])
+    n = 0
+    for i in spatial_frequency_range:
+        u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
+        if u > 1 and v > 1:
+            transitions[u][v] += i
+            n+=1
+    transitions *= np.array([amplitude * math.asinh(magic/ math.pi / sine_frequency * i + phase) for i in spatial_frequency_range])
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
     for i in range(num_states):
@@ -41,7 +43,8 @@ def generate_text(transitions, unique_words, start_word, text_length, n, num_cho
         probabilities = transitions[current_state]
         next_state = np.random.choice(next_states, p=probabilities)
         next_word = unique_words[next_state]
-        generated_text.append(next_word)
+        if len(re.sub(r'[^a-zA-Z0-9\s]', '', next_word)) >len(next_word)-2:
+            generated_text.append(next_word)
         current_state = next_state
         if current_state ==  next_state+4:
             current_state = len(unique_words) - 1
