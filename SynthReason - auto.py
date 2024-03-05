@@ -1,31 +1,38 @@
-# SynthReason v12.2 *ULTRA*
+# SynthReason v12.5 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
 import math
 size = 250
-n_value = 3 
+n = 3
 num_choices = 3
 memoryLimiter = 50000
 cognitionThreshold = 10000
-magic = 20
-sine_frequency = 50.2
-amplitude = 100.4
-phase = 71.1
+magic = 2
+sine_frequency = 5.2
+amplitude = 10.4
+phase = 7.1
+
+def index_of(words, word):
+    try:
+        if word in words:
+            return words.index(word)
+    except:
+        return 0
 def fit(text):
-    words = text.lower().split() 
+    words = text.lower().split()
     unique_words = list(set(words))
     num_states = len(unique_words)
     transitions = np.zeros((num_states, num_states))
     keyword_frequencies = {keyword: words.index(keyword) for keyword in unique_words}
     spatial_frequency_range = np.array([keyword_frequencies[keyword] for keyword in unique_words])
     n = 0
-    for i in spatial_frequency_range:
-        u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
-        if u > 1 and v > 1:
+    for i in keyword_frequencies:
+        u, v = index_of(unique_words, i), index_of(unique_words, words[n])
+        if u > 1 and v > 1 and u < n and v < n:
             transitions[u][v] += n
-            n += 1
+        n += 1
     transitions *= np.array([amplitude * math.asinh(magic/ math.pi / sine_frequency * math.acosh(i + phase)) for i in spatial_frequency_range])
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
@@ -41,21 +48,15 @@ def generate_text(transitions, unique_words, start_word, text_length, n, num_cho
     for _ in range(text_length - n):
         next_states = np.arange(len(transitions[current_state]))
         probabilities = transitions[current_state]
-        keyword_frequencies = {unique_words[i]: i for i in next_states}
-        spatial_frequency_range = np.array([keyword_frequencies[keyword] for keyword in unique_words])  
-        probabilities *= np.array([amplitude * math.asinh(magic/ math.pi / sine_frequency * math.acosh(i + phase)) for i in spatial_frequency_range])
-        epsilon = 1e-10
-        probabilities += epsilon
-        probabilities /= probabilities.sum()
         next_state = np.random.choice(next_states, p=probabilities)
         next_word = unique_words[next_state]
-        if len(re.sub(r'[^a-zA-Z0-9\s]', '', next_word)) > len(next_word)-2:
+        if len(re.sub(r'[^a-zA-Z0-9\s]', '', next_word)) >len(next_word)-2:
             generated_text.append(next_word)
         current_state = next_state
-        if current_state == next_state + 4:
+        if current_state ==  next_state+4:
             current_state = len(unique_words) - 1
-        elif current_state == _ - 1:
-            next_state + 4
+        elif current_state ==  _ - 1:
+            next_state+4
     return ' '.join(generated_text)
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
@@ -75,9 +76,9 @@ for question in questions:
         with open(file, encoding="UTF-8") as f:
             text = f.read() 
         user_words = re.sub("\W+", " ", user_input).split()
-        filtered_text = ' '.join(preprocess_text(text, user_words))[:memoryLimiter]
+        filtered_text = ' '.join(preprocess_text(text, user_words)[:memoryLimiter])
         transitions, unique_words = fit(filtered_text)
-        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n_value, num_choices)  # Changed n to n_value
+        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n, num_choices)
         if len(generated_text) > len("Word not found."):
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
