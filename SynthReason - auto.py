@@ -1,4 +1,4 @@
-# SynthReason v12.7 *ULTRA*
+# SynthReason v14.1 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -9,17 +9,10 @@ n = 3
 num_choices = 3
 memoryLimiter = 50000
 cognitionThreshold = 10000
-magic = 2
-sine_frequency = 5.2
-amplitude = 10.4
-phase = 7.1
-
-def index_of(words, word):
-    try:
-        if word in words:
-            return words.index(word)
-    except:
-        return 0
+magic = 20
+sine_frequency = 50.2
+amplitude = 100.4
+phase = 71.1
 def fit(text):
     words = text.lower().split()
     unique_words = list(set(words))
@@ -28,12 +21,12 @@ def fit(text):
     keyword_frequencies = {keyword: words.index(keyword) for keyword in unique_words}
     spatial_frequency_range = np.array([keyword_frequencies[keyword] for keyword in unique_words])
     n = 0
-    for i in keyword_frequencies:
-        u, v = index_of(unique_words, i), index_of(unique_words, words[n])
-        if u > 1 and v > 1 and u < n and v < n:
+    for i in spatial_frequency_range:
+        u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
+        if u > 1 and v > 1:
             transitions[u][v] += n
-        n += 1
-    transitions *= np.array([amplitude * math.asinh(magic/ math.pi / sine_frequency * math.acosh(i + phase)) for i in spatial_frequency_range])
+            n+=1
+    transitions *= np.array([amplitude * math.hypot(magic/ math.pi / sine_frequency * math.acosh(i + phase)) for i in spatial_frequency_range])
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
     for i in range(num_states):
@@ -61,7 +54,7 @@ def generate_text(transitions, unique_words, start_word, text_length, n, num_cho
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
     user_words_set = set(user_words)
-    return [word for sentence in sentences for word in sentence.split() if set(sentence.split()).union(user_words_set)]
+    return [word for sentence in sentences for word in sentence.split() if set(sentence.split()).intersection(user_words_set)]
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
@@ -76,9 +69,9 @@ for question in questions:
         with open(file, encoding="UTF-8") as f:
             text = f.read() 
         user_words = re.sub("\W+", " ", user_input).split()
-        filtered_text = ' '.join(preprocess_text(text, user_words)[:memoryLimiter])
+        filtered_text = ' '.join(preprocess_text(text, user_words))[:memoryLimiter]
         transitions, unique_words = fit(filtered_text)
-        generated_text = generate_text(transitions, preprocess_text(text, user_words)[:memoryLimiter], user_words[-1], size, n, num_choices)
+        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n, num_choices)
         if len(generated_text) > len("Word not found."):
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
