@@ -1,4 +1,4 @@
-# SynthReason v14.3 *ULTRA*
+# SynthReason v14.4 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -26,7 +26,7 @@ def fit(text):
         if u > 1 and v > 1:
             transitions[u][v] += n
             n+=1
-    transitions *= np.array([amplitude * (magic/ math.pi / sine_frequency * math.acosh(i + phase) for i in spatial_frequency_range])
+    transitions *= np.array([amplitude * (magic/ math.pi / sine_frequency * math.acosh(i + phase)) for i in spatial_frequency_range])
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
     for i in range(num_states):
@@ -62,7 +62,7 @@ with open("questions.conf", encoding="ISO-8859-1") as f:
 random.shuffle(questions)
 random_number = random.randint(0, 10000000)
 filename = "Compendium#" + str(random_number) + ".txt"
-while True:
+while(True):
     random.shuffle(files)
     user_input = input("USER: ").strip().lower() 
     for file in files:
