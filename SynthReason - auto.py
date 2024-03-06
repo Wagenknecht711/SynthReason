@@ -1,4 +1,4 @@
-# SynthReason v14.4 *ULTRA*
+# SynthReason v14.5 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -54,7 +54,7 @@ def generate_text(transitions, unique_words, start_word, text_length, n, num_cho
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
     user_words_set = set(user_words)
-    return [word for sentence in sentences for word in sentence.split() if set(sentence.split()).intersection(user_words_set)]
+    return [word for sentence in sentences for word in sentence.split() if len(set(sentence.split()).intersection(user_words_set))>1]
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
@@ -69,7 +69,7 @@ for question in questions:
         with open(file, encoding="UTF-8") as f:
             text = f.read() 
         user_words = re.sub("\W+", " ", user_input).split()
-        filtered_text = ' '.join(preprocess_text(text, user_words))[:memoryLimiter]
+        filtered_text = ' '.join(preprocess_text(text, user_words)[:memoryLimiter])
         transitions, unique_words = fit(filtered_text)
         generated_text = generate_text(transitions, unique_words, user_words[-1], size, n, num_choices)
         if len(generated_text) > len("Word not found."):
