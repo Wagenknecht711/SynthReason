@@ -1,4 +1,4 @@
-# SynthReason v14.2 *ULTRA*
+# SynthReason v14.3 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random

@@ -1,4 +1,4 @@
-# SynthReason v14.2 *ULTRA*
+# SynthReason v14.3 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -26,8 +26,6 @@ def fit(text):
         if u > 1 and v > 1:
             transitions[u][v] += n
             n+=1
-    print(math.hypot(magic/ math.pi / sine_frequency * math.acosh(1 + phase)))
-    print(magic/ math.pi / sine_frequency * math.acosh(1 + phase))
     transitions *= np.array([amplitude * (magic/ math.pi / sine_frequency * math.acosh(i + phase) for i in spatial_frequency_range])
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
