@@ -1,4 +1,4 @@
-# SynthReason v14.5 *ULTRA*
+# SynthReason v14.6 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -6,13 +6,7 @@ import numpy as np
 import math
 size = 250
 n = 3
-num_choices = 3
 memoryLimiter = 50000
-cognitionThreshold = 10000
-magic = 20
-sine_frequency = 50.2
-amplitude = 100.4
-phase = 71.1
 def fit(text):
     words = text.lower().split()
     unique_words = list(set(words))
@@ -26,14 +20,14 @@ def fit(text):
         if u > 1 and v > 1:
             transitions[u][v] += n
             n+=1
-    transitions *= np.array([amplitude * (magic/ math.pi / sine_frequency * math.acosh(i + phase)) for i in spatial_frequency_range])
+    transitions *= np.array([i for i in list(reversed(spatial_frequency_range))])
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
     for i in range(num_states):
         if row_sums[i] == 0:
             transitions[i] = np.ones(num_states) / num_states
     return transitions, unique_words
-def generate_text(transitions, unique_words, start_word, text_length, n, num_choices):
+def generate_text(transitions, unique_words, start_word, text_length, n):
     if start_word not in unique_words:
         return "Word not found."
     generated_text = [start_word]
@@ -71,7 +65,7 @@ while(True):
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words)[:memoryLimiter])
         transitions, unique_words = fit(filtered_text)
-        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n, num_choices)
+        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n)
         if len(generated_text) > len("Word not found."):
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
