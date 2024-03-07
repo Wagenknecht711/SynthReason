@@ -1,11 +1,12 @@
-# SynthReason v14.6 *ULTRA*
+# SynthReason v14.7 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
 import math
-size = 250
+size = 100
 n = 3
+precision = 1
 memoryLimiter = 50000
 def fit(text):
     words = text.lower().split()
@@ -48,7 +49,7 @@ def generate_text(transitions, unique_words, start_word, text_length, n):
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
     user_words_set = set(user_words)
-    return [word for sentence in sentences for word in sentence.split() if len(set(sentence.split()).intersection(user_words_set))>1]
+    return [word for sentence in sentences for word in sentence.split() if len(set(sentence.split()).intersection(user_words_set))>precision]
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
@@ -65,8 +66,8 @@ while(True):
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words)[:memoryLimiter])
         transitions, unique_words = fit(filtered_text)
-        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n)
-        if len(generated_text) > len("Word not found."):
+        generated_text = sorted(generate_text(transitions, unique_words, user_words[-1], size, n).split("."))[0] + "."
+        if len(generated_text) > len("Word not found.") and generated_text.find(".") >= size:
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
                 f.write("\nUsing: " + file.strip() + " Answering: " + user_input + "\n" + generated_text + "\n")
