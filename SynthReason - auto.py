@@ -1,11 +1,10 @@
-# SynthReason v14.8 *ULTRA*
+# SynthReason v14.9 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 import math
 size = 250
 n = 3
 precision = 2
-memoryLimiter = 50000
 def fit(text, n):
     words = text.lower().split()
     unique_words = list(set(words))
@@ -53,7 +52,7 @@ def preprocess_text(text, user_words):
     for sentence in sentences:
         if len(set(sentence.split()).intersection(user_words_set)) > precision:
             filtered_words.append(sentence)
-    return filtered_words[:memoryLimiter]
+    return filtered_words
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
 with open("questions.conf", encoding="ISO-8859-1") as f:
