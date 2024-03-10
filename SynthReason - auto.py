@@ -1,4 +1,4 @@
-# SynthReason v15.0 *ULTRA*
+# SynthReason v15.1 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 import math
@@ -27,8 +27,6 @@ def fit(text, n):
         else:
             transitions[i] = [transitions[i][j] / row_sum for j in range(num_states)]
     return transitions, unique_words
-
-
 def generate_text(transitions, unique_words, start_ngram, text_length, n):
     if start_ngram not in unique_words:
         return "N-gram not found."
@@ -44,7 +42,6 @@ def generate_text(transitions, unique_words, start_ngram, text_length, n):
             generated_text.append(next_word)
         current_state = next_state
     return ' '.join(generated_text)
-
 def preprocess_text(text, user_words):
     sentences = text.lower().split('. ')
     user_words_set = set(user_words)
