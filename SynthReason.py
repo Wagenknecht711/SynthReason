@@ -1,23 +1,24 @@
-# SynthReason v14.7 *ULTRA*
+# SynthReason v14.8 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 import math
-size = 100
+size = 250
 n = 3
-precision = 1
+precision = 2
 memoryLimiter = 50000
-def fit(text):
+def fit(text, n):
     words = text.lower().split()
     unique_words = list(set(words))
     num_states = len(unique_words)
+    ngrams = [" ".join(words[i:i+n]) for i in range(len(words)-n+1)]
+    keyword_frequencies = {keyword: ngrams.count(keyword) for keyword in set(ngrams)}
     transitions = [[0] * num_states for _ in range(num_states)]
-    keyword_frequencies = {keyword: words.index(keyword) for keyword in unique_words}
     for i in range(len(words) - 1):
         u, v = unique_words.index(words[i]), unique_words.index(words[i + 1])
         if u > 1 and v > 1:
-            transitions[u][v] += i
+            transitions[u][v] += 1
     for j in range(num_states):
-        spatial_frequency_range = [keyword_frequencies[unique_words[j]] for _ in range(num_states)]
+        spatial_frequency_range = [keyword_frequencies[ngrams[j]] for _ in range(num_states)]
         for i, u in enumerate(spatial_frequency_range):
             transitions[j][i] *= u
     for i in range(num_states):
@@ -27,28 +28,31 @@ def fit(text):
         else:
             transitions[i] = [transitions[i][j] / row_sum for j in range(num_states)]
     return transitions, unique_words
-def generate_text(transitions, unique_words, start_word, text_length, n):
-    if start_word not in unique_words:
-        return "Word not found."
-    generated_text = [start_word]
-    current_state = unique_words.index(start_word)
+
+
+def generate_text(transitions, unique_words, start_ngram, text_length, n):
+    if start_ngram not in unique_words:
+        return "N-gram not found."
+    generated_text = start_ngram.split()
+    current_state = unique_words.index(start_ngram)
     for _ in range(text_length - n):
         next_states = list(range(len(transitions[current_state])))
         probabilities = transitions[current_state]
         next_state = random.choices(next_states, weights=probabilities)[0]
-        next_word = unique_words[next_state]
+        next_ngram = unique_words[next_state]
+        next_word = next_ngram.split()[-1]
         if len(''.join(filter(str.isalnum, next_word))) > len(next_word) - 2:
             generated_text.append(next_word)
         current_state = next_state
     return ' '.join(generated_text)
+
 def preprocess_text(text, user_words):
     sentences = text.lower().split('. ')
     user_words_set = set(user_words)
     filtered_words = []
     for sentence in sentences:
-        for word in sentence.split():
-            if len(set(sentence.split()).intersection(user_words_set)) > precision:
-                filtered_words.append(word)
+        if len(set(sentence.split()).intersection(user_words_set)) > precision:
+            filtered_words.append(sentence)
     return filtered_words[:memoryLimiter]
 with open("FileList.conf", encoding="ISO-8859-1") as f:
     files = f.read().splitlines()
@@ -65,8 +69,8 @@ while True:
             text = f.read() 
         user_words = ''.join(e if e.isalnum() or e.isspace() else ' ' for e in user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words))
-        transitions, unique_words = fit(filtered_text)
-        generated_text = sorted(generate_text(transitions, unique_words, user_words[-1], size, n).split("."))[0] + "."
+        transitions, unique_words = fit(filtered_text,6)
+        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n)
         if len(generated_text) > len("Word not found."):
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
