@@ -1,8 +1,8 @@
-# SynthReason v15.1 *ULTRA*
+# SynthReason v15.2 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 import math
-size = 250
+size = 850
 n = 3
 precision = 2
 def fit(text, n):
@@ -37,7 +37,7 @@ def generate_text(transitions, unique_words, start_ngram, text_length, n):
         probabilities = transitions[current_state]
         next_state = random.choices(next_states, weights=probabilities)[0]
         next_ngram = unique_words[next_state]
-        next_word = next_ngram.split()[-1]
+        next_word = next_ngram.split()[0]
         if len(''.join(filter(str.isalnum, next_word))) > len(next_word) - 2:
             generated_text.append(next_word)
         current_state = next_state
