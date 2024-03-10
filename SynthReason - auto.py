@@ -1,4 +1,4 @@
-# SynthReason v14.9 *ULTRA*
+# SynthReason v15.0 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 import math
@@ -15,7 +15,7 @@ def fit(text, n):
     for i in range(len(words) - 1):
         u, v = unique_words.index(words[i]), unique_words.index(words[i + 1])
         if u > 1 and v > 1:
-            transitions[u][v] += 1
+            transitions[u][v] += u
     for j in range(num_states):
         spatial_frequency_range = [keyword_frequencies[ngrams[j]] for _ in range(num_states)]
         for i, u in enumerate(spatial_frequency_range):
