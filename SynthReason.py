@@ -1,25 +1,26 @@
-# SynthReason v15.3 *ULTRA*
+# SynthReason v15.4 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 import math
-size = 850
+size = 250
 n = 3
+n2 = 16
 precision = 2
 def fit(text, n):
     words = text.lower().split()
     unique_words = list(set(words))
     num_states = len(unique_words)
     ngrams = [" ".join(words[i:i+n]) for i in range(len(words)-n+1)]
-    keyword_frequencies = {keyword: ngrams.count(keyword) for keyword in set(ngrams)}
     transitions = [[0] * num_states for _ in range(num_states)]
     for i in range(len(words) - 1):
-        u, v = unique_words.index(words[i]), unique_words.index(words[i + 1])
+        keyword_frequencies = {keyword: ngrams.count(keyword)+i for keyword in set(ngrams)}
+        u, v = unique_words.index(words[i-1]), unique_words.index(words[i])
         if u > 1 and v > 1:
             transitions[u][v] += 1
-    for j in range(num_states):
-        spatial_frequency_range = [keyword_frequencies[ngrams[j]] for _ in range(num_states)]
+        for j in range(num_states):
+            spatial_frequency_range = [keyword_frequencies[ngrams[j]] for _ in range(num_states)]
         for i, u in enumerate(spatial_frequency_range):
-            transitions[j][i] *= u
+            transitions[j][i] *= 1
     for i in range(num_states):
         row_sum = sum(transitions[i])
         if row_sum == 0:
@@ -65,7 +66,7 @@ while(True):
             text = f.read() 
         user_words = ''.join(e if e.isalnum() or e.isspace() else ' ' for e in user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words))
-        transitions, unique_words = fit(filtered_text,6)
+        transitions, unique_words = fit(filtered_text,n2)
         generated_text = generate_text(transitions, unique_words, user_words[-1], size, n)
         if len(generated_text) > len("Word not found."):
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
