@@ -1,4 +1,4 @@
-# SynthReason v15.5 *ULTRA*
+# SynthReason v15.8 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import random
 import math
@@ -39,7 +39,7 @@ def generate_text(transitions, unique_words, start_ngram, text_length, n):
         next_state = random.choices(next_states, weights=probabilities)[0]
         next_ngram = unique_words[next_state]
         next_word = next_ngram.split()[0]
-        if len(''.join(filter(str.isalnum, next_word))) > len(next_word) - 2:
+        if (len(''.join(filter(str.isalnum, next_word))) > len(next_word) - 2 and unique_words.count(next_ngram) > 0 ):
             generated_text.append(next_word)
         current_state = next_state
     return ' '.join(generated_text)
