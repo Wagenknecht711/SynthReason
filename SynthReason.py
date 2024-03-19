@@ -1,4 +1,4 @@
-# SynthReason v16.2 *Latest*
+# SynthReason v16.3 *EPIC*
 # Copyright 2024 George Wagenknecht
 import random
 import math
@@ -15,12 +15,11 @@ def fit(text, n):
     for i in range(len(transitions) - 1):
         keyword_frequencies = {keyword: ngrams.count(keyword)+i for keyword in set(ngrams)}
         spatial_frequency_range = [keyword_frequencies[ngrams[j]] for j in range(num_states)]
-
         u, v = unique_words.index(words[i-1]), unique_words.index(words[i])
         if u > 1 and v > 1:
             transitions[u][v] += 1
         for j, u in enumerate(spatial_frequency_range):
-            transitions[j][i] *= u
+            transitions[-1][i] *= 1
     for i in range(num_states):
         row_sum = sum(transitions[i])
         if row_sum == 0:
