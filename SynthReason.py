@@ -1,4 +1,4 @@
-# SynthReason v16.5 *EPIC*
+# SynthReason v16.6 *EPIC*
 # Copyright 2024 George Wagenknecht
 import random
 import math
@@ -19,7 +19,7 @@ def fit(text, n):
         if u > 1 and v > 1:
             transitions[u][v] += 1
         for j, u in enumerate(spatial_frequency_range):
-            transitions[-1][i] *= 1
+            transitions[-1][0] *= 1
     for i in range(num_states):
         row_sum = sum(transitions[i])
         if row_sum == 0:
@@ -39,9 +39,9 @@ def generate_text(transitions, unique_words, ngrams, start_ngram, text_length, n
         if next_state < len(ngrams):
             next_ngram = ngrams[next_state]
             next_word = next_ngram.split()[-1]
-        if len(''.join(filter(str.isalnum, next_word))) > len(next_word) - 2 and next_word not in generated_text:
+        if len(''.join(filter(str.isalnum, next_word))) > len(next_word) - 2 and next_ngram not in generated_text:
             generated_text.append(next_ngram)
-        current_state = next_state
+        current_state = unique_words.index(next_word)
     return ' '.join(generated_text)
 def preprocess_text(text, user_words):
     sentences = text.lower().split('.')
