@@ -1,4 +1,4 @@
-# SynthReason v16.1 *ULTRA*
+# SynthReason v16.2 *Latest*
 # Copyright 2024 George Wagenknecht
 import random
 import math
