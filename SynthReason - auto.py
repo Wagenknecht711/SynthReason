@@ -1,11 +1,11 @@
-# SynthReason v17.8 *ULTRA*
+# SynthReason v17.9 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
 import math
 size = 250
-n = 3
+n = 2
 def fit(text):
     words = text.lower().split()
     unique_words = list(set(words))
