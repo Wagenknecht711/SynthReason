@@ -1,4 +1,4 @@
-# SynthReason v18.0 *ULTRA*
+# SynthReason v18.1 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -17,7 +17,7 @@ def fit(text):
     for i in spatial_frequency_range:
         u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
         if u > 1 and v > 1:
-            transitions[u][v] += n
+            transitions[u][v] += 1
             n+=1
     transitions *= np.array([i for i in list(reversed(spatial_frequency_range))])
     row_sums = transitions.sum(axis=1, keepdims=True)
