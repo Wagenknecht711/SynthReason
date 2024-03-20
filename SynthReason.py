@@ -1,4 +1,4 @@
-# SynthReason v17.9 *ULTRA*
+# SynthReason v18.0 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -36,9 +36,10 @@ def generate_text(transitions, unique_words, start_word, text_length, n):
         probabilities = transitions[current_state]
         next_state = np.random.choice(next_states, p=probabilities)
         next_word = unique_words[next_state]
-        if len(re.sub(r'[^a-zA-Z0-9\s]', '', next_word)) >len(next_word)-2:
+        i = unique_words.index(next_word)
+        if len(re.sub(r'[^a-zA-Z0-9\s]', '', next_word)) >len(next_word)-2 and next_word not in generated_text:
             generated_text.append(next_word)
-        current_state = next_state
+        current_state = i
         if current_state ==  next_state+4:
             current_state = len(unique_words) - 1
         elif current_state ==  _ - 1:
