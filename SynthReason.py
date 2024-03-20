@@ -1,4 +1,4 @@
-# SynthReason v14.6 *ULTRA*
+# SynthReason v17.8 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -6,7 +6,6 @@ import numpy as np
 import math
 size = 250
 n = 3
-memoryLimiter = 50000
 def fit(text):
     words = text.lower().split()
     unique_words = list(set(words))
@@ -22,7 +21,7 @@ def fit(text):
             n+=1
     transitions *= np.array([i for i in list(reversed(spatial_frequency_range))])
     row_sums = transitions.sum(axis=1, keepdims=True)
-    transitions = np.where(row_sums != 0, transitions / row_sums, transitions)
+    transitions = np.where(row_sums > 0, transitions / row_sums, transitions)
     for i in range(num_states):
         if row_sums[i] == 0:
             transitions[i] = np.ones(num_states) / num_states
@@ -63,7 +62,7 @@ while(True):
         with open(file, encoding="UTF-8") as f:
             text = f.read() 
         user_words = re.sub("\W+", " ", user_input).split()
-        filtered_text = ' '.join(preprocess_text(text, user_words)[:memoryLimiter])
+        filtered_text = ' '.join(preprocess_text(text, user_words))
         transitions, unique_words = fit(filtered_text)
         generated_text = generate_text(transitions, unique_words, user_words[-1], size, n)
         if len(generated_text) > len("Word not found."):
