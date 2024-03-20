@@ -1,11 +1,11 @@
-# SynthReason v18.1 *ULTRA*
+# SynthReason v18.2 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
 import math
 size = 250
-n = 2
+n = 1
 def fit(text):
     words = text.lower().split()
     unique_words = list(set(words))
@@ -35,8 +35,9 @@ def generate_text(transitions, unique_words, start_word, text_length, n):
         next_states = np.arange(len(transitions[current_state]))
         probabilities = transitions[current_state]
         next_state = np.random.choice(next_states, p=probabilities)
-        next_word = unique_words[next_state]
-        i = unique_words.index(next_word)
+        i = unique_words.index(unique_words[next_state])
+
+        next_word = unique_words[i]
         if len(re.sub(r'[^a-zA-Z0-9\s]', '', next_word)) >len(next_word)-2 and next_word not in generated_text:
             generated_text.append(next_word)
         current_state = i
