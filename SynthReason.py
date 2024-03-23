@@ -1,4 +1,4 @@
-# SynthReason v18.3 *ULTRA*
+# SynthReason v18.5 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -9,9 +9,6 @@ size = 250
 n = 3
 def sigmoid(x):
         return 1 / (1 + np.exp(-x))
-def softmax(x):
-        exp_scores = np.exp(x - np.max(x, axis=1, keepdims=True))
-        return exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 def fit(text):
     words = text.lower().split()
     unique_words = list(set(words))
@@ -21,8 +18,16 @@ def fit(text):
     spatial_frequency_range = np.array([keyword_frequencies[keyword] for keyword in unique_words])
     n = 0
     x = np.linspace(0, 2*np.pi, len(spatial_frequency_range))
-    y = np.sin(x) + np.random.normal(scale=.1, size=x.shape) + spatial_frequency_range
-    p = T.fit(x, y, n)
+    y = np.sin(x) + np.random.normal(scale=.1, size=x.shape)
+    p = T.fit(x, y, 5)
+    for i in p:
+        u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
+        if u > 1 and v > 1:
+            transitions[u][v] += sigmoid(i)
+            n+=1
+    x = np.linspace(0, 2*np.pi, len(spatial_frequency_range))
+    y = np.sin(x) + np.random.normal(scale=.1, size=x.shape)
+    p = T.fit(x, y, 5)
     for i in p:
         u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
         if u > 1 and v > 1:
