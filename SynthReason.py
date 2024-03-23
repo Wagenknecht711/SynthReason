@@ -1,4 +1,4 @@
-# SynthReason v18.7 *MASTER*
+# SynthReason v18.8 *MASTER*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -33,7 +33,7 @@ def fit(text):
             if u > 1 and v > 1:
                 transitions[u][v] += sigmoid(i)
                 n+=1
-    transitions *= np.exp(transitions - np.max(transitions, axis=1, keepdims=True))
+    transitions *= np.exp(np.random.normal(scale=.1, size=x.shape) - np.max(transitions, axis=1, keepdims=True))
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums > 0, transitions / row_sums, transitions)
     for i in range(num_states):
