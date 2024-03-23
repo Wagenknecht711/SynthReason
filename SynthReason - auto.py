@@ -1,4 +1,4 @@
-# SynthReason v18.5 *ULTRA*
+# SynthReason v18.7 *MASTER*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -25,20 +25,23 @@ def fit(text):
         if u > 1 and v > 1:
             transitions[u][v] += sigmoid(i)
             n+=1
-    x = np.linspace(0, 2*np.pi, len(spatial_frequency_range))
-    y = np.sin(x) + np.random.normal(scale=.1, size=x.shape)
-    p = T.fit(x, y, 5)
-    for i in p:
-        u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
-        if u > 1 and v > 1:
-            transitions[u][v] += sigmoid(i)
-            n+=1
+        x = np.linspace(0, 2*np.pi, len(spatial_frequency_range))
+        y = np.sin(x) + np.random.normal(scale=.1, size=x.shape)
+        p = T.fit(x, y, 5)
+        for i in p:
+            u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
+            if u > 1 and v > 1:
+                transitions[u][v] += sigmoid(i)
+                n+=1
     transitions *= np.exp(transitions - np.max(transitions, axis=1, keepdims=True))
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums > 0, transitions / row_sums, transitions)
     for i in range(num_states):
-        if row_sums[i] == 0:
-            transitions[i] = np.ones(num_states) / num_states
+        row_sum = sum(transitions[i])
+        if row_sum == 0:
+            transitions[i] = [1 / num_states] * num_states
+        else:
+            transitions[i] = [transitions[i][j] / row_sum for j in range(num_states)]
     return transitions, unique_words
 def generate_text(transitions, unique_words,n_grams, start_word, text_length, n):
     if start_word not in unique_words:
@@ -50,7 +53,7 @@ def generate_text(transitions, unique_words,n_grams, start_word, text_length, n)
         probabilities = transitions[current_state]
         next_state = np.random.choice(next_states, p=probabilities)
         next_word = n_grams[next_state]
-        if len(re.sub(r'[^a-zA-Z0-9\s]', '', next_word)) >len(next_word)-2 and next_word not in generated_text:
+        if len(re.sub(r'[^a-zA-Z\s]', '', next_word)) >len(next_word)-2 and next_word not in generated_text:
             generated_text.append(next_word)
         current_state = next_state
     return ' '.join(generated_text)
@@ -72,9 +75,10 @@ for question in questions:
         with open(file, encoding="UTF-8") as f:
             text = f.read() 
         words = text.lower().split()
-        n_grams = [' '.join(words[i:i + n]) for i in range(len(words) - n + 1)]
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words))
+        n_grams = [' '.join(words[i:i + n]) for i in range(len(filtered_text.split()) - n + 1)]
+        
         transitions, unique_words = fit(filtered_text)
         generated_text = generate_text(transitions, unique_words,n_grams, user_words[-1], size, n)
         if len(generated_text) > len("Word not found."):
