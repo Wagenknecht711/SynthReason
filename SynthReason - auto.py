@@ -1,11 +1,17 @@
-# SynthReason v18.2 *ULTRA*
+# SynthReason v18.3 *ULTRA*
 # Copyright 2024 George Wagenknecht
 import re
 import random
 import numpy as np
 import math
+from numpy.polynomial import Chebyshev as T
 size = 250
-n = 1
+n = 3
+def sigmoid(x):
+        return 1 / (1 + np.exp(-x))
+def softmax(x):
+        exp_scores = np.exp(x - np.max(x, axis=1, keepdims=True))
+        return exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
 def fit(text):
     words = text.lower().split()
     unique_words = list(set(words))
@@ -14,19 +20,22 @@ def fit(text):
     keyword_frequencies = {keyword: words.index(keyword) for keyword in unique_words}
     spatial_frequency_range = np.array([keyword_frequencies[keyword] for keyword in unique_words])
     n = 0
-    for i in spatial_frequency_range:
+    x = np.linspace(0, 2*np.pi, len(spatial_frequency_range))
+    y = np.sin(x) + np.random.normal(scale=.1, size=x.shape) + spatial_frequency_range
+    p = T.fit(x, y, n)
+    for i in p:
         u, v = unique_words.index(words[n]), unique_words.index(words[n + 1])
         if u > 1 and v > 1:
-            transitions[u][v] += 1
+            transitions[u][v] += sigmoid(i)
             n+=1
-    transitions *= np.array([i for i in list(reversed(spatial_frequency_range))])
+    transitions *= np.exp(transitions - np.max(transitions, axis=1, keepdims=True))
     row_sums = transitions.sum(axis=1, keepdims=True)
     transitions = np.where(row_sums > 0, transitions / row_sums, transitions)
     for i in range(num_states):
         if row_sums[i] == 0:
             transitions[i] = np.ones(num_states) / num_states
     return transitions, unique_words
-def generate_text(transitions, unique_words, start_word, text_length, n):
+def generate_text(transitions, unique_words,n_grams, start_word, text_length, n):
     if start_word not in unique_words:
         return "Word not found."
     generated_text = [start_word]
@@ -35,16 +44,10 @@ def generate_text(transitions, unique_words, start_word, text_length, n):
         next_states = np.arange(len(transitions[current_state]))
         probabilities = transitions[current_state]
         next_state = np.random.choice(next_states, p=probabilities)
-        i = unique_words.index(unique_words[next_state])
-
-        next_word = unique_words[i]
+        next_word = n_grams[next_state]
         if len(re.sub(r'[^a-zA-Z0-9\s]', '', next_word)) >len(next_word)-2 and next_word not in generated_text:
             generated_text.append(next_word)
-        current_state = i
-        if current_state ==  next_state+4:
-            current_state = len(unique_words) - 1
-        elif current_state ==  _ - 1:
-            next_state+4
+        current_state = next_state
     return ' '.join(generated_text)
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
@@ -63,10 +66,12 @@ for question in questions:
     for file in files:
         with open(file, encoding="UTF-8") as f:
             text = f.read() 
+        words = text.lower().split()
+        n_grams = [' '.join(words[i:i + n]) for i in range(len(words) - n + 1)]
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words))
         transitions, unique_words = fit(filtered_text)
-        generated_text = generate_text(transitions, unique_words, user_words[-1], size, n)
+        generated_text = generate_text(transitions, unique_words,n_grams, user_words[-1], size, n)
         if len(generated_text) > len("Word not found."):
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
             with open(filename, "a", encoding="utf8") as f:
