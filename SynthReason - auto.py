@@ -1,4 +1,4 @@
-# SynthReason v20.0 *MASTER*
+# SynthReason v20.1 *MASTER*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -23,7 +23,7 @@ def generate_text(transitions, words, start_word, text_length):
     current_word = start_word
     for _ in range(text_length - 1):
         current_index = words.index(current_word)
-        next_index = np.random.choice(len(transitions[current_index]), p=transitions[current_index])
+        next_index = np.random.choice(range(len(transitions[current_index])), p=transitions[current_index])
         next_word = words[next_index]
         generated_text.append(next_word)
         current_word = next_word
