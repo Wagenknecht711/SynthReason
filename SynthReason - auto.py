@@ -1,4 +1,4 @@
-# SynthReason v19.1 *MASTER*
+# SynthReason v19.2 *MASTER*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -47,7 +47,7 @@ for question in questions:
             text = f.read() 
         user_words = re.sub("\W+", " ", user_input).split()
         filtered_text = ' '.join(preprocess_text(text, user_words))
-        transitions, unique_words = fit(filtered_text, n=3)
+        transitions, unique_words = fit(filtered_text, n=1)
         if user_words[-1] in unique_words:
             generated_text = generate_text(transitions, unique_words, user_words[-1], 250)
             print("\nUsing:", file.strip(), "Answering:", user_input, "\nAI:", generated_text, "\n\n")
