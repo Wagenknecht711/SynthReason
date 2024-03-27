@@ -1,4 +1,4 @@
-# SynthReason v19.0 *MASTER*
+# SynthReason v19.1 *MASTER*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -14,7 +14,10 @@ def fit(text, n):
         current_index = unique_words.index(current_word)
         next_index = unique_words.index(next_word)
         transitions[current_index][next_index] += 1
-    transitions /= np.sum(transitions, axis=1, keepdims=True)
+    row_sums = np.sum(transitions, axis=1, keepdims=True)
+    if np.any(row_sums == 0):
+        print("Warning: Zero row sums detected in transition matrix.")
+    transitions /= row_sums
     return transitions, unique_words
 def generate_text(transitions, unique_words, start_word, text_length):
     generated_text = [start_word]
