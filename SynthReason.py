@@ -1,4 +1,4 @@
-# SynthReason v20.1 *MASTER*
+# SynthReason v20.2 *MASTER*
 # Copyright 2024 George Wagenknecht
 import re
 import random
@@ -15,7 +15,9 @@ def fit(text):
         transitions[current_index][next_index] += 1
     row_sums = np.sum(transitions, axis=1, keepdims=True)
     if np.any(row_sums == 0):
-        print("Warning: Zero row sums detected in transition matrix.")
+        print("Warning: Zero row sums detected in transition matrix. Setting probabilities for those states to uniform distribution.")
+        zero_row_indices = np.where(row_sums == 0)[0]
+        transitions[zero_row_indices, :] = 1 / len(transitions)  # Set zero probabilities to uniform distribution
     transitions /= row_sums
     return transitions, words
 def generate_text(transitions, words, start_word, text_length):
@@ -27,6 +29,7 @@ def generate_text(transitions, words, start_word, text_length):
         next_word = words[next_index]
         generated_text.append(next_word)
         current_word = next_word
+    generated_text = [re.sub(r'[^a-zA-Z]', '', word) for word in generated_text]
     return ' '.join(generated_text)
 def preprocess_text(text, user_words):
     sentences = re.split(r'(?<=[.!?])\s+', text.lower())
